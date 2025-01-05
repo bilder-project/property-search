@@ -6,8 +6,8 @@ export class SupabaseService {
   private supabase;
 
   constructor() {
-    const supabaseUrl = 'https://dqundwtpkgtfhreonqkd.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxdW5kd3Rwa2d0ZmhyZW9ucWtkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTE2NDk0OCwiZXhwIjoyMDQ2NzQwOTQ4fQ.sqyQIH8aH1mEQ_5iJg5xjjNR-bhgxxLG759L3BzhFNg';
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_KEY;
     this.supabase = createClient(supabaseUrl, supabaseKey);
   }
 
