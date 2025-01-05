@@ -13,6 +13,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/property-search/openapi', app, document);
 
-  await app.listen(8080);
+  await app.listen(3000);
 }
 bootstrap();

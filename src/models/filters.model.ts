@@ -1,4 +1,5 @@
 export interface Filter {
+  searchQuery?: string;
   locationLat?: number;
   locationLon?: number;
   locationMaxDistance?: number;

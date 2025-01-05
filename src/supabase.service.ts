@@ -1,12 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
-import { Filter } from './filters.model';
+import { Filter } from './models/filters.model';
+import { ConfigService } from '@nestjs/config';
 
 export class SupabaseService {
   private supabase;
 
   constructor() {
     const supabaseUrl = 'https://dqundwtpkgtfhreonqkd.supabase.co';
-    const supabaseKey = process.env.SUPABASE_SERVICE_KEY!;
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxdW5kd3Rwa2d0ZmhyZW9ucWtkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTE2NDk0OCwiZXhwIjoyMDQ2NzQwOTQ4fQ.sqyQIH8aH1mEQ_5iJg5xjjNR-bhgxxLG759L3BzhFNg';
     this.supabase = createClient(supabaseUrl, supabaseKey);
   }
 
@@ -17,16 +18,20 @@ export class SupabaseService {
       search_radius: radius, // in meters
     });
 
-    if (error) throw error;
-    return data;
+    if (error) return { data: null, error: error };
+    return { data: data, error: null };
   }
 
   // Fetch all properties with optional filters
   async fetchProperties(filters: Filter) {
     const query = this.supabase.from('properties').select('*');
 
+    if (filters.searchQuery) {
+        query.textSearch('name', filters.searchQuery);
+    }
+
     if (filters.locationLat && filters.locationLon) {
-        const { data: properties, error } = await this.fetchPropertiesByLocation(
+        const { data, error } = await this.fetchPropertiesByLocation(
             filters.locationLat,
             filters.locationLon,
             filters.locationMaxDistance || 10000
@@ -34,7 +39,7 @@ export class SupabaseService {
 
         if (error) throw error;
 
-        const propertyIds = properties.map((property) => property.id);
+        const propertyIds = data.map((property) => property.id);
         query.in('id', propertyIds);
     } 
     if (filters.types) {
