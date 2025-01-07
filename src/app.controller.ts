@@ -110,4 +110,9 @@ export class AppController {
     });
   }
 
+  @Get('health') 
+  healthCheck() {
+    return this.appService.healthCheck();
+  }
+
 }

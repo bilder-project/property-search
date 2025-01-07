@@ -14,4 +14,8 @@ export class AppService {
     return this.supabaseService.fetchProperties(filters);
   }
 
+  async healthCheck() {
+    return { status: 'ok' };
+  }
+
 }
