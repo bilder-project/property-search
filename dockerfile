@@ -1,10 +1,20 @@
+# Use Node.js base image
 FROM node:21-alpine
+
+# Set the working directory
 WORKDIR /app
 
-COPY package.json yarn.lock tsconfig.json ./
-RUN yarn install
+# Copy package definition files
+COPY package.json package-lock.json tsconfig.json ./
 
+# Install dependencies using npm
+RUN npm install
+
+# Copy the source code
 COPY src ./src
-RUN yarn build
 
+# Build the application
+RUN npm run build
+
+# Set the entry point
 ENTRYPOINT ["node", "dist/main.js"]
