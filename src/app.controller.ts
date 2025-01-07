@@ -14,7 +14,7 @@ import { AppService } from './app.service';
 import { ApiBadGatewayResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { Property } from './models/property.model';
 
-@Controller('properties')
+@Controller('property-search')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
