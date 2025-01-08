@@ -11,7 +11,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('/property-search/docs', app, document);
+  SwaggerModule.setup('/property-search/swaggerui', app, document);
 
   await app.listen(8080);
 }
