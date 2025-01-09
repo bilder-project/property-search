@@ -11,7 +11,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { AppService } from './app.service';
-import { ApiBadGatewayResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiBadGatewayResponse, ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { Property } from './models/property.model';
 
 @Controller('property-search')
@@ -22,6 +22,7 @@ export class AppController {
   @Get('search')
   @ApiOkResponse({
     type: Property,
+    isArray: true,
     description: 'Get all properties with optional query filters',
   })
   @ApiBadGatewayResponse({ description: 'Bad Gateway', type: BadGatewayException })
@@ -103,6 +104,24 @@ export class AppController {
       sizeMin,
       sizeMax,
     });
+  }
+
+  @Get('recommendations')
+  @ApiOkResponse({
+    type: Property,
+    isArray: true,
+    description: 'Get all properties with optional query filters',
+  })
+  @ApiBadGatewayResponse({ description: 'Bad Gateway', type: BadGatewayException })
+  @ApiNotFoundResponse({ description: 'Not Found', type: NotFoundException  })
+  @ApiQuery({
+    name: 'userId',
+    required: true,
+    type: String,
+    description: 'User ID to get recommendations for',
+  })
+  getRecommendations(@Query() userId: string) {
+    return this.appService.getRecommendedProperties(userId);
   }
 
   @Get('health') 
