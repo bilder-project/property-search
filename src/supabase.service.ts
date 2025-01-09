@@ -57,7 +57,6 @@ export class SupabaseService {
     if (filters.sizeMax) {
       query.lte('size', filters.sizeMax);
     }
-
     const { data, error } = await query;
     if (error) throw error;
     return data;

@@ -18,11 +18,6 @@ import { Property } from './models/property.model';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
-
   // Get all properties with optional query filters
   @Get('search')
   @ApiOkResponse({

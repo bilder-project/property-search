@@ -6,10 +6,6 @@ import { Filter } from './models/filters.model';
 export class AppService {
   constructor(private readonly supabaseService: SupabaseService) {}
 
-  getHello(): string {
-    return 'Hello World!';
-  }
-
   async getProperties(filters: Filter) {
     return this.supabaseService.fetchProperties(filters);
   }
