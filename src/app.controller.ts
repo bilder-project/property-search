@@ -106,6 +106,7 @@ export class AppController {
     });
   }
 
+  
   @Get('recommendations')
   @ApiOkResponse({
     type: Property,
