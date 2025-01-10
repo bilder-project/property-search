@@ -82,6 +82,7 @@ export class AppController {
     description: 'Maximum size of the property',
   })
   async searchProperties(
+    @Query('userId') userId?: string,
     @Query('searchQuery') searchQuery?: string,
     @Query('locationLat') locationLat?: string,
     @Query('locationLon') locationLon?: string,
@@ -94,6 +95,7 @@ export class AppController {
   ) {
     typeof types === 'string' ? types = [types] : types;
     return this.appService.getProperties({
+      userId,
       searchQuery,
       locationLat: parseFloat(locationLat),
       locationLon: parseFloat(locationLon),
@@ -106,7 +108,7 @@ export class AppController {
     });
   }
 
-  
+
   @Get('recommendations')
   @ApiOkResponse({
     type: Property,
