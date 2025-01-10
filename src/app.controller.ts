@@ -28,6 +28,12 @@ export class AppController {
   @ApiBadGatewayResponse({ description: 'Bad Gateway', type: BadGatewayException })
   @ApiNotFoundResponse({ description: 'Not Found', type: NotFoundException  })
   @ApiQuery({
+    name: 'userId',
+    required: true,
+    type: String,
+    description: 'User ID to get recommendations for',
+  })
+  @ApiQuery({
     name: 'searchQuery',
     required: false,
     type: String,
