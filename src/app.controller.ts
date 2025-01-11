@@ -1,22 +1,30 @@
 import {
   Controller,
   Get,
-  Post,
-  Put,
-  Delete,
-  Param,
-  Body,
   Query,
   BadGatewayException,
   NotFoundException,
+  Inject,
 } from '@nestjs/common';
 import { AppService } from './app.service';
-import { ApiBadGatewayResponse, ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiBadGatewayResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { Property } from './models/property.model';
+import { Counter, Histogram, Registry } from 'prom-client';
 
 @Controller('property-search')
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    @Inject('http_requests_total') private readonly counter: Counter<string>,
+    @Inject('http_request_duration_seconds')
+    private readonly histogram: Histogram<string>,
+    @Inject('PrometheusRegistry') private readonly registry: Registry, // Inject the Prometheus registry
+  ) {}
 
   // Get all properties with optional query filters
   @Get('search')
@@ -25,8 +33,11 @@ export class AppController {
     isArray: true,
     description: 'Get all properties with optional query filters',
   })
-  @ApiBadGatewayResponse({ description: 'Bad Gateway', type: BadGatewayException })
-  @ApiNotFoundResponse({ description: 'Not Found', type: NotFoundException  })
+  @ApiBadGatewayResponse({
+    description: 'Bad Gateway',
+    type: BadGatewayException,
+  })
+  @ApiNotFoundResponse({ description: 'Not Found', type: NotFoundException })
   @ApiQuery({
     name: 'userId',
     required: true,
@@ -99,21 +110,33 @@ export class AppController {
     @Query('sizeMin') sizeMin?: number,
     @Query('sizeMax') sizeMax?: number,
   ) {
-    typeof types === 'string' ? types = [types] : types;
-    return this.appService.getProperties({
-      userId,
-      searchQuery,
-      locationLat: parseFloat(locationLat),
-      locationLon: parseFloat(locationLon),
-      locationMaxDistance,
-      types,
-      priceMin,
-      priceMax,
-      sizeMin,
-      sizeMax,
-    });
+    const start = Date.now(); // Start measuring time
+    try {
+      typeof types === 'string' ? (types = [types]) : types;
+      const result = this.appService.getProperties({
+        userId,
+        searchQuery,
+        locationLat: parseFloat(locationLat),
+        locationLon: parseFloat(locationLon),
+        locationMaxDistance,
+        types,
+        priceMin,
+        priceMax,
+        sizeMin,
+        sizeMax,
+      });
+      // Increment counter for successful requests
+      this.counter.labels('GET', '/search', '200').inc();
+      return result;
+    } catch (error) {
+      // Increment counter for failed requests
+      this.counter.labels('GET', '/search', '500').inc();
+      throw error;
+    } finally {
+      const duration = (Date.now() - start) / 1000; // Calculate duration in seconds
+      this.histogram.labels('GET', '/search', '200').observe(duration);
+    }
   }
-
 
   @Get('recommendations')
   @ApiOkResponse({
@@ -121,19 +144,37 @@ export class AppController {
     isArray: true,
     description: 'Get all properties with optional query filters',
   })
-  @ApiBadGatewayResponse({ description: 'Bad Gateway', type: BadGatewayException })
-  @ApiNotFoundResponse({ description: 'Not Found', type: NotFoundException  })
+  @ApiBadGatewayResponse({
+    description: 'Bad Gateway',
+    type: BadGatewayException,
+  })
+  @ApiNotFoundResponse({ description: 'Not Found', type: NotFoundException })
   @ApiQuery({
     name: 'userId',
     required: true,
     type: String,
     description: 'User ID to get recommendations for',
   })
-  getRecommendations(@Query() userId: string) {
-    return this.appService.getRecommendedProperties(userId);
+  async getRecommendations(@Query() userId: string) {
+    const start = Date.now();
+
+    try {
+      const result = await this.appService.getRecommendedProperties(userId);
+
+      // Increment counter for successful requests
+      this.counter.labels('GET', '/recommendations', '200').inc();
+      return result;
+    } catch (error) {
+      // Increment counter for failed requests
+      this.counter.labels('GET', '/recommendations', '500').inc();
+      throw error;
+    } finally {
+      const duration = (Date.now() - start) / 1000;
+      this.histogram.labels('GET', '/recommendations', '200').observe(duration);
+    }
   }
 
-  @Get('health') 
+  @Get('health')
   healthCheck() {
     return this.appService.healthCheck();
   }
