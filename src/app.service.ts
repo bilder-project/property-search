@@ -22,7 +22,9 @@ export class AppService {
   }
 
   async getProperties(filters: Filter) {
-    await this.sendToKafka('property-search-events', JSON.stringify(filters));
+    if (filters.userId) {
+      await this.sendToKafka('property-search-events', JSON.stringify(filters));
+    }
     return this.supabaseService.fetchProperties(filters);
   }
 

@@ -40,7 +40,7 @@ export class AppController {
   @ApiNotFoundResponse({ description: 'Not Found', type: NotFoundException })
   @ApiQuery({
     name: 'userId',
-    required: true,
+    required: false,
     type: String,
     description: 'User ID to get recommendations for',
   })
